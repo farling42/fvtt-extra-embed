@@ -5,21 +5,27 @@
 ![](https://img.shields.io/badge/Foundry-v9-informational)
 ![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/fvtt-extra-embed/latest/module.zip)
 
+Do you love the new `@Embed` enricher but wish it could embed on the first **sentence** or **paragraph** from the linked document? Then this module is for you!
+
 ## Introduction
 
 This module extends the capabilities of `@Embed` added in Foundry V12+ with some extra config options (which should appear after the uuid in the embed).
-
-## `inline=sentence`
-
-Only the first sentence from the linked document will be inserted into the current paragraph.
-
-The inserted text will be in it's own `span` (and Foundry will give the span a class of `content-embed`).
 
 ## `inline=paragraph`
 
 Only the text of the first paragraph from the linked document will be inserted into the current paragraph. (Unlike the normal `inline` syntax of `@Embed` which puts the inline text into a separate section.)
 
-The inserted text will be in it's own `span` (and Foundry will give the span a class of `content-embed`).
+_The inserted text will be in it's own `span` (and Foundry will give the span a class of `content-embed`)._
+
+## `inline=sentence`
+
+Only the first sentence from the linked document will be inserted into the current paragraph.
+
+_The inserted text will be in it's own `span` (and Foundry will give the span a class of `content-embed`)._
+
+## Additional Information
+
+The original implementation of `@Embed` is described at https://github.com/foundryvtt/foundryvtt/issues/10262
 
 ## Support
 
