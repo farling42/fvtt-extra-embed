@@ -17,6 +17,12 @@ Only the text of the first paragraph from the linked document will be inserted i
 
 _The inserted text will be in it's own `span` (and Foundry will give the span a class of `content-embed`)._
 
+## `inline=paragraph:N`  (where N is a number)
+
+Only the text of the nth paragraph (as identified by the number after the colon) from the linked document will be inserted into the current paragraph. (Unlike the normal `inline` syntax of `@Embed` which puts the inline text into a separate section.)
+
+_The inserted text will be in it's own `span` (and Foundry will give the span a class of `content-embed`)._
+
 ## `inline=sentence`
 
 Only the first sentence from the linked document will be inserted into the current paragraph.

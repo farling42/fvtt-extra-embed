@@ -22,10 +22,12 @@ async function my_createInlineEmbed(wrapped, content, config, options) {
             return span;
         }
     }
-    else if (config.inline === 'paragraph' && 
+    else if (config.inline.startsWith('paragraph') && 
         content instanceof HTMLCollection) {
+        let match = config.inline.match(/paragraph(?::(\d+))*/);
+        let instance = Math.max(1,Number(match[1] || "1"));
         for (const elem of content)
-            if (elem.nodeName === 'P') {
+            if (elem.nodeName === 'P' && --instance === 0) {
                 const span = document.createElement("span");
                 span.innerHTML = elem.innerHTML;
                 return span;
