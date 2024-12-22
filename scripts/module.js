@@ -10,6 +10,7 @@ async function my_createInlineEmbed(wrapped, content, config, options) {
     // if ( content instanceof HTMLCollection ) section.append(...content);
     // else section.append(content);
     // return section;
+    if (!config) return wrapped(content, config, options);
 
     if (config.inline === 'sentence' && 
         content instanceof HTMLCollection && 
@@ -22,7 +23,8 @@ async function my_createInlineEmbed(wrapped, content, config, options) {
             return span;
         }
     }
-    else if (config.inline.startsWith('paragraph') && 
+    else if (typeof config.inline === 'string' && 
+        config.inline.startsWith('paragraph') && 
         content instanceof HTMLCollection) {
         let match = config.inline.match(/paragraph(?::(\d+))*/);
         let instance = Math.max(1,Number(match[1] || "1"));
