@@ -3,6 +3,7 @@ import {libWrapper} from './lib/libwrapper-shim.js'
 const MODULE_NAME = "extra-embed";
 
 const SENTENCE_REGEXP = /^(@\w+\[.+?\]\{.+?\}|.)+?[.?!]/;
+const HEADER_REGEXP = /H[1-6]/i;
 
 async function my_createInlineEmbed(wrapped, content, config, options) {
     // --- Core Foundry V12 does this: ---
@@ -11,6 +12,36 @@ async function my_createInlineEmbed(wrapped, content, config, options) {
     // else section.append(content);
     // return section;
     if (!config) return wrapped(content, config, options);
+    
+    const {anchor} = config;
+    if (anchor != null && 
+        content instanceof HTMLCollection && 
+        content.length > 0){
+        let anchorType = undefined;
+        const selection = [];
+        const span = document.createElement("span");
+        // needs to include 'inline' ofc, maybe this logic also be in the other embed functions? or do we only want it here 
+        for (let i = 0; i < content.length; i++) {
+            const elem = content[i];
+            if (HEADER_REGEXP.test(elem.tagName)){
+                if (elem.innerText.toLowerCase() === anchor.toLowerCase() && anchorType == null){
+                    anchorType = elem.tagName;
+                    console.log('added' + elem.innerText);
+                    selection.push(elem);
+                }
+                else if (anchorType != null && anchorType === elem.tagName){
+                    break;
+                }
+            }
+            else if (anchorType != null) {
+                console.log('added' + elem.innerText);
+                selection.push(elem);
+            }
+            console.log(i, JSON.stringify(selection));
+        }
+        selection.forEach(e => span.appendChild(e));
+        return span;
+    }
 
     if (config.inline === 'sentence' && 
         content instanceof HTMLCollection && 
@@ -38,8 +69,56 @@ async function my_createInlineEmbed(wrapped, content, config, options) {
     return wrapped(content, config, options);
 }
 
+ function my_parseEmbedConfig(raw, options={}) {
+    const config = { values: [] };
+
+    for ( const part of raw.match(/(?:[^\s"]+|"[^"]*")+/g) ) {
+      if ( !part ) continue;
+      const [key, value] = part.split("=")
+      const valueLower = value?.toLowerCase();
+      if ( value === undefined ) config.values.push(key.replace(/(^"|"$)/g, ""));
+      else if ( (valueLower === "true") || (valueLower === "false") ) config[key] = valueLower === "true";
+      else if ( Number.isNumeric(value) ) config[key] = Number(value);
+      else config[key] = value.replace(/(^"|"$)/g, "");
+    }
+    
+    // Handle finding and extracting the page anchor
+    for ( const [i, value] of config.values.entries() ) {
+        const [valueNoAnchor, anchor] = value.split("#");
+        if (anchor != null) {
+            config.anchor = anchor;
+            config.values[i] = valueNoAnchor;
+        }
+    }
+    
+    // Handle default embed configuration options.
+    if ( !("cite" in config) ) config.cite = true;
+    if ( !("caption" in config) ) config.caption = true;
+    if ( !("inline" in config) ) {
+      const idx = config.values.indexOf("inline");
+      if ( idx > -1 ) {
+        config.inline = true;
+        config.values.splice(idx, 1);
+      }
+    }
+    if ( !config.uuid ) {
+      for ( const [i, value] of config.values.entries() ) {
+        try {
+          const parsed = foundry.utils.parseUuid(value, options);
+          if ( parsed?.documentId ) {
+            config.uuid = value;
+            config.values.splice(i, 1);
+            break;
+          }
+        } catch {}
+      }
+    }
+    return config;
+  }
+
 
 Hooks.once('ready', async function() {
     libWrapper.register(MODULE_NAME, 'JournalEntryPage.prototype._createInlineEmbed', my_createInlineEmbed, libWrapper.MIXED);
     libWrapper.register(MODULE_NAME, 'Item.prototype._createInlineEmbed',             my_createInlineEmbed, libWrapper.MIXED);
+    libWrapper.register(MODULE_NAME, 'TextEditor._parseEmbedConfig',                  my_parseEmbedConfig, libWrapper.OVERRIDE);
 });
