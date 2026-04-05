@@ -7,7 +7,7 @@
   "compatibility": {
     "minimum": 12,
     "verified": 12,
-    "maximum": 13
+    "maximum": 14
   },
   "authors": [
     {
@@ -28,17 +28,7 @@
   }]
   },
   "esmodules": [
-    "scripts/module.js"
-  ],
-  "styles": [
-    "styles/module.css"
-  ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "languages/en.json"
-    }
+    "scripts/extra-embed.js"
   ],
   "url": "#{URL}#",
   "manifest": "#{MANIFEST}#",
